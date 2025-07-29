@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>TETRA Terminal</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      background-color: #f4f4f4;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      align-items: flex-start;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      resize: vertical;
+    }
+    input, select, button {
+      font-size: 1em;
+      padding: 0.4em;
+    }
+    .map {
+      height: 400px;
+      margin-top: 1em;
+    }
+    .map-preview {
+      height: 200px;
+      width: 300px;
+      margin-top: 0;
+    }
+    #dbLogs table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+    #dbLogs th, #dbLogs td {
+      border: 1px solid #ccc;
+      padding: 0.3em;
+      word-break: break-all;
+    }
+    #dbLogs th {
+      background: #eee;
+    }
+    #contactsTable {
+      border-collapse: collapse;
+    }
+    #contactsTable th, #contactsTable td {
+      border: 1px solid #ccc;
+      padding: 0.3em;
+      word-break: break-all;
+    }
+    #contactsTable th {
+      background: #eee;
+    }
+    #intervalList {
+      border: 1px solid #ccc;
+      padding: 0.3em;
+      min-width: 120px;
+      min-height: 2em;
+    }
+    .interval-item {
+      display: flex;
+      align-items: center;
+    }
+    .interval-item button {
+      margin-left: 0.3em;
+    }
+    .tg-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3em;
+      margin-left: 1em;
+    }
+    .tg-entry {
+      border: 1px solid #ccc;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      background: #eee;
+      font-size: 0.9em;
+    }
+    .tg-entry.active {
+      background: yellow;
+    }
+
+    .site-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3em;
+      margin-left: 1em;
+    }
+    .site-entry {
+      border: 1px solid #ccc;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      background: #eee;
+      font-size: 0.9em;
+    }
+    .site-entry.online { background: #cfc; }
+    .site-entry.offline { background: #fdd; }
+
+    details {
+      border: 1px solid #ccc;
+      padding: 0.3em;
+      background: #f9f9f9;
+      margin-bottom: 0.5em;
+    }
+    details > summary {
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
+    .scrollable {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    body.dark details {
+      background: #333;
+      border-color: #555;
+    }
+
+    body.dark {
+      background-color: #222;
+      color: #eee;
+    }
+    body.dark input,
+    body.dark select,
+    body.dark button,
+    body.dark textarea {
+      background-color: #333;
+      color: #eee;
+      border-color: #555;
+    }
+    body.dark #dbLogs th,
+    body.dark #contactsTable th,
+    body.dark .tg-entry,
+    body.dark .site-entry {
+      background: #555;
+    }
+    body.dark #dbLogs td,
+    body.dark #dbLogs th,
+    body.dark #contactsTable td,
+    body.dark #contactsTable th,
+    body.dark .tg-entry,
+    body.dark .site-entry {
+      border-color: #666;
+    }
+    body.dark .site-entry.online { background: #060; color:#fff; }
+    body.dark .site-entry.offline { background: #600; color:#fff; }
+  </style>
+  <link rel="stylesheet" href="libs/leaflet.css">
+</head>
+<body>
+  <h2>TETRA-Terminal</h2>
+  <div class="container">
+    <div class="row">
+      <label for="baudRate">Baudrate:</label>
+      <select id="baudRate" style="width:6em">
+        <option value="115200">115200</option>
+        <option value="9600">9600</option>
+        <option value="19200">19200</option>
+        <option value="28800">28800</option>
+        <option value="38400">38400</option>
+        <option value="57600">57600</option>
+        <option value="76800">76800</option>
+      </select>
+      <button id="connect">🔌 Verbinden</button>
+      <button id="disconnect">❌ Trennen</button>
+    </div>
+    <div class="row">
+      <label for="baudRatePei">Baudrate 2:</label>
+      <select id="baudRatePei" style="width:6em">
+        <option value="115200">115200</option>
+        <option value="9600">9600</option>
+        <option value="19200">19200</option>
+        <option value="28800">28800</option>
+        <option value="38400">38400</option>
+        <option value="57600">57600</option>
+        <option value="76800">76800</option>
+      </select>
+      <button id="connectPei">🔌 Verbinden&nbsp;G2</button>
+      <button id="disconnectPei">❌ Trennen&nbsp;G2</button>
+      <button id="initPei">⚙️ Init&nbsp;G2</button>
+    </div>
+    <div class="row">
+      <input type="checkbox" id="darkModeToggle">
+      <label for="darkModeToggle">🌙 Dark&nbsp;Mode</label>
+    </div>
+    <div class="row" id="commandButtons"></div>
+
+    <div class="row">
+      <select id="sdsType">
+        <option value="0">Normal SDS</option>
+        <option value="1">Flash SDS</option>
+        <option value="2">Status</option>
+      </select>
+      <input type="text" id="destination" placeholder="Zielnummer (z.B. 2633869)">
+      <input type="text" id="message" placeholder="Nachricht (ASCII)">
+      <button id="sendSds">📨 SDS senden</button>
+      <textarea id="sdsMessages" readonly style="width:300px;height:200px"></textarea>
+      <div id="mapPreview" class="map map-preview"></div>
+      <div id="contactsTableWrapper" style="overflow-y:auto;max-height:200px;">
+        <table id="contactsTable">
+          <thead>
+            <tr><th>#</th><th>Nummer</th><th>Name</th></tr>
+          </thead>
+          <tbody id="contactsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <input type="checkbox" id="ackEnabled">
+      <label for="ackEnabled">Automatische Empfangsbestätigung senden</label>
+    </div>
+
+    <div class="row">
+      <input type="text" id="gpsIssi" placeholder="ISSI (z.B. 2633869)">
+      <input type="number" id="intervalSeconds" value="30" min="5" style="width:5em">
+      <select id="markerSelect">
+        <option value="man">Person</option>
+        <option value="car">Auto</option>
+        <option value="walkie">Walkie&nbsp;Talkie</option>
+        <option value="pin">Stecknadel</option>
+        <option value="people">Gruppe</option>
+        <option value="telecom">Antenne</option>
+      </select>
+      <button id="requestGps">📍 GPS von ISSI abfragen</button>
+      <button id="startInterval">Intervalabfrage</button>
+      <button id="requestLip">LIP</button>
+      <button id="requestLongLip">Long&nbsp;LIP</button>
+      <button id="requestLrrp">LRRP</button>
+      <div id="intervalList" style="display:flex;flex-direction:column;margin-left:1em;"></div>
+    </div>
+    <div class="row">
+      <label for="trackSelect">Track:</label>
+      <select id="trackSelect">
+        <option value="">(kein)</option>
+      </select>
+      <button id="clearTrack">Track löschen</button>
+    </div>
+    <div class="row">
+      <label for="houseLabel">Hausmarker:</label>
+      <input type="text" id="houseLabel" value="🏠 DJ 2 TH (2631997)">
+      <input type="checkbox" id="keepMarkers">
+      <label for="keepMarkers">Marker behalten</label>
+      <div id="siteStatusDisplay" class="site-status"></div>
+    </div>
+
+    <div class="row">
+      <input type="text" id="customCommand" placeholder="AT-Befehl manuell">
+      <button id="sendCustom">⏎ Senden</button>
+      <button id="importWebMarkers">🌍 Marker importieren</button>
+      <button id="importHamnetMarkers">📡 HamnetDB</button>
+      <button id="toggleWebParser">Start Web Parser</button>
+    </div>
+    <div class="row">
+      <input type="text" id="customPeiCommand" placeholder="PEI-Befehl">
+      <button id="sendCustomPei">⏎ Senden&nbsp;G2</button>
+    </div>
+    <div class="row">
+      <button id="enableTnp1">Alle TNP1&nbsp;Service-Profile einschalten</button>
+      <select id="tnp1ProfileSelect"></select>
+      <button id="enableTnp1Single">Profil schalten</button>
+      <div id="tgDisplay" class="tg-status"></div>
+    </div>
+
+    <details>
+      <summary>Output</summary>
+      <div class="row">
+        <textarea id="output" readonly></textarea>
+        <button id="clearLog">🧹 Log leeren</button>
+      </div>
+    </details>
+    <details>
+      <summary>Signalstärke dBm</summary>
+      <canvas id="rssiChart" style="max-height:200px"></canvas>
+    </details>
+
+    <div id="webParser">
+      <details>
+        <summary>Status</summary>
+        <div class="scrollable">
+          <table>
+            <thead><tr><th>Site</th><th>State</th><th>Aktive Groups</th></tr></thead>
+            <tbody id="webStatusBody"></tbody>
+          </table>
+        </div>
+      </details>
+      <details>
+        <summary>QRV Users</summary>
+        <div class="scrollable">
+          <table>
+            <thead><tr><th>ISSI</th><th>Callsign</th><th>Site</th><th>Groups</th></tr></thead>
+            <tbody id="webQrvBody"></tbody>
+          </table>
+        </div>
+      </details>
+      <details>
+        <summary>Logging</summary>
+        <div class="scrollable">
+          <table>
+            <thead><tr><th>Site</th><th>Modul</th><th>Message</th><th>Timestamp</th></tr></thead>
+            <tbody id="webLoggingBody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <details>
+      <summary>OSM-Karte</summary>
+      <div id="map" class="map"></div>
+    </details>
+
+    <details>
+      <summary>IndexedDB</summary>
+      <div id="dbLogs">
+        <div class="row">
+          <select id="dbStore">
+            <option value="all">Alle</option>
+            <option value="commands">Commands</option>
+            <option value="sds">SDS</option>
+            <option value="gps">GPS</option>
+            <option value="contacts">Contacts</option>
+            <option value="markers">Markers</option>
+            <option value="tracks">Tracks</option>
+            <option value="web_status">Web Status</option>
+            <option value="web_qrv">Web QRV</option>
+            <option value="web_logs">Web Logs</option>
+          </select>
+          <input type="text" id="dbFilter" placeholder="Filter">
+          <select id="dbSort">
+            <option value="timestamp_desc">Neueste zuerst</option>
+            <option value="timestamp_asc">Älteste zuerst</option>
+          </select>
+          <button id="exportDbCsv">📥 DB CSV-Export</button>
+          <button id="exportDbJson">📥 DB JSON-Export</button>
+          <input type="file" id="importDbFile" accept="application/json">
+          <button id="importDbJson">📤 DB JSON-Import</button>
+          <button id="clearDb">🗑️ Auswahl löschen</button>
+        </div>
+        <table id="dbTable">
+          <thead>
+            <tr><th>Zeit</th><th>Typ</th><th>Daten</th><th></th></tr>
+          </thead>
+          <tbody id="dbTableBody"></tbody>
+        </table>
+      </div>
+    </details>
+    <details>
+      <summary>Init-Befehle</summary>
+      <div class="row">
+        <label for="initCommands">Init-Befehle:</label>
+        <textarea id="initCommands" style="height:100px"></textarea>
+      </div>
+    </details>
+    <details>
+      <summary>DAPNET POCSAG</summary>
+      <div class="row">
+        <input type="text" id="dapnetHost" placeholder="wss://www.hampager.de/api/ws" style="width:18em">
+        <input type="text" id="dapnetUser" placeholder="Callsign">
+        <input type="password" id="dapnetKey" placeholder="Auth Key">
+        <button id="dapnetConnect">Start Monitor</button>
+      </div>
+      <textarea id="dapnetMessages" readonly style="height:200px"></textarea>
+    </details>
+
+  <script src="libs/leaflet.js"></script>
+  <script src="libs/chart.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
