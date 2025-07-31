@@ -2,6 +2,12 @@
 
 Diese HTML/JavaScript-Anwendung steuert ein Tetra Amateurfunkgerät direkt aus dem Browser über die Web Serial API. Neben einer Reihe fester AT-Befehle bietet das Tool umfassende Unterstützung für SDS und GPS.
 
+
+
+![Screen1](https://github.com/user-attachments/assets/be4a466a-5389-49f0-93c3-fb24446eb753)
+
+
+
 ## Funktionsumfang
 
 * **Serielle Verbindung mit wählbarer Baudrate** – beim Klick auf *Verbinden* wird die Schnittstelle geöffnet und das Terminal automatisch initialisiert.
