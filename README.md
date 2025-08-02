@@ -72,6 +72,25 @@ Browser‑Log angezeigt.
 * [HamnetDB](https://hamnetdb.net) (über `https://r.jina.ai`)
 * [core01.tmo.services](https://core01.tmo.services)
 
+## Geplante Erweiterungen
+
+- **Zweiter Serial-Connector:** Unterstützung für den Betrieb eines zweiten Geräts.
+- **Auswertung von Statusmeldungen:** Steuerung von Gerät A und Gerät B durch Auswertung von Meldungen (z. B. gezieltes Umschalten).
+- **Vollständige DAPNET-Integration:** Inklusive Mapping zwischen TETRA- und DAPNET-Nachrichten.
+- **Audiohandling:** Unterstützung für USB-Soundkarten zur Audioverarbeitung.
+- **SVXLink DMO-Unterstützung:** Optionaler Betrieb eines dritten Geräts für SVXLink DMO.
+
+
+
+## Offene Verbesserungen
+
+- **Timerprobleme bei SDS:** Optimierung der Zeitsteuerung im SDS-Handling.
+- **Dynamische Variablen:** Weg von konstanten zu dynamisch anpassbaren Variablen.
+- **Alternative zu IndexedDB:** Umstieg auf eine andere, flexiblere Speicherlösung.
+- **UI/UX:** Weitere Optimierungen und Modernisierung des Layouts.
+
+
+
 ## Copyright
 
 © 2025 DJ2TH / Torben Hahlbeck. Die Nutzung und Weitergabe dieses Projekts ist für
