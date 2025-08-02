@@ -91,6 +91,16 @@ Browser‑Log angezeigt.
 
 
 
+## Ganz großes Danke geht an:
+
+- **Lukas**
+- **Lawrence**
+- **Peter**
+- **Ben**
+- **ChatGPT**
+
+
+
 ## Copyright
 
 © 2025 DJ2TH / Torben Hahlbeck. Die Nutzung und Weitergabe dieses Projekts ist für
